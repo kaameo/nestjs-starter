@@ -9,6 +9,7 @@ import {
   databaseConfig,
   jwtConfig,
   mailConfig,
+  metricsConfig,
   throttleConfig,
   type AppConfig,
   type ThrottleConfig,
@@ -20,13 +21,14 @@ import { DatabaseModule } from './database/database.module'
 import { AuthModule } from './modules/auth/auth.module'
 import { UserModule } from './modules/user/user.module'
 import { HealthModule } from './modules/health/health.module'
+import { MetricsModule } from './modules/metrics/metrics.module'
 
 @Module({
   imports: [
     // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, jwtConfig, mailConfig, throttleConfig],
+      load: [appConfig, databaseConfig, jwtConfig, mailConfig, throttleConfig, metricsConfig],
       envFilePath: [`.env.${process.env.NODE_ENV || 'development'}`, '.env'],
     }),
 
@@ -104,6 +106,7 @@ import { HealthModule } from './modules/health/health.module'
     AuthModule,
     UserModule,
     HealthModule,
+    MetricsModule,
   ],
   providers: [
     {

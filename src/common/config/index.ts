@@ -3,3 +3,4 @@ export { default as databaseConfig, type DatabaseConfig } from './database.confi
 export { default as jwtConfig, type JwtConfig } from './jwt.config'
 export { default as mailConfig, type MailConfig } from './mail.config'
 export { default as throttleConfig, type ThrottleConfig } from './throttle.config'
+export { default as metricsConfig, type MetricsConfig } from './metrics.config'

@@ -33,7 +33,7 @@ async function bootstrap() {
 
   // Global prefix
   app.setGlobalPrefix('api/v1', {
-    exclude: ['/health', '/health/ready'],
+    exclude: ['/health', '/health/ready', '/metrics'],
   })
 
   // Global pipes, filters, interceptors

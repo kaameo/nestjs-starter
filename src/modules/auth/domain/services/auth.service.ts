@@ -42,11 +42,7 @@ export class AuthService {
     private readonly refreshTokenRepository: RefreshTokenRepositoryPort,
   ) {}
 
-  async signUp(data: {
-    email: string
-    password: string
-    name: string
-  }): Promise<void> {
+  async signUp(data: { email: string; password: string; name: string }): Promise<void> {
     const existingUser = await this.userRepository.findByEmail(data.email)
     if (existingUser) {
       throw new ConflictException('Email already registered')
@@ -64,11 +60,7 @@ export class AuthService {
       emailVerificationExpires: verificationExpires,
     })
 
-    await this.mailService.sendVerificationEmail(
-      data.email,
-      verificationToken,
-      data.name,
-    )
+    await this.mailService.sendVerificationEmail(data.email, verificationToken, data.name)
   }
 
   async signIn(data: {
@@ -82,29 +74,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials')
     }
 
-    const isPasswordValid = await this.hashService.compare(
-      data.password,
-      user.password,
-    )
+    const isPasswordValid = await this.hashService.compare(data.password, user.password)
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials')
     }
 
     if (!user.isEmailVerified()) {
-      throw new BusinessException(
-        'EMAIL_NOT_VERIFIED',
-        HttpStatus.FORBIDDEN,
-        'Email not verified',
-      )
+      throw new BusinessException('EMAIL_NOT_VERIFIED', HttpStatus.FORBIDDEN, 'Email not verified')
     }
 
-    return this.generateAndStoreTokenPair(
-      user.id,
-      user.email,
-      user.role,
-      data.userAgent,
-      data.ip,
-    )
+    return this.generateAndStoreTokenPair(user.id, user.email, user.role, data.userAgent, data.ip)
   }
 
   async verifyEmail(token: string): Promise<TokenPair> {
@@ -117,10 +96,7 @@ export class AuthService {
       )
     }
 
-    if (
-      user.emailVerificationExpires &&
-      user.emailVerificationExpires < new Date()
-    ) {
+    if (user.emailVerificationExpires && user.emailVerificationExpires < new Date()) {
       throw new BusinessException(
         'TOKEN_EXPIRED',
         HttpStatus.BAD_REQUEST,
@@ -134,11 +110,7 @@ export class AuthService {
       emailVerificationExpires: null,
     })
 
-    return this.generateAndStoreTokenPair(
-      updatedUser.id,
-      updatedUser.email,
-      updatedUser.role,
-    )
+    return this.generateAndStoreTokenPair(updatedUser.id, updatedUser.email, updatedUser.role)
   }
 
   async resendVerification(email: string): Promise<void> {
@@ -160,18 +132,10 @@ export class AuthService {
       emailVerificationExpires: verificationExpires,
     })
 
-    await this.mailService.sendVerificationEmail(
-      email,
-      verificationToken,
-      user.name,
-    )
+    await this.mailService.sendVerificationEmail(email, verificationToken, user.name)
   }
 
-  async refreshToken(
-    refreshTokenStr: string,
-    userAgent?: string,
-    ip?: string,
-  ): Promise<TokenPair> {
+  async refreshToken(refreshTokenStr: string, userAgent?: string, ip?: string): Promise<TokenPair> {
     const payload = await this.tokenService.verifyRefreshToken(refreshTokenStr)
     const storedToken = await this.refreshTokenRepository.findByJti(payload.jti)
 
@@ -185,21 +149,13 @@ export class AuthService {
 
     // Attempt atomic revocation (first-writer-wins)
     const newJti = randomUUID()
-    const wasRevoked = await this.refreshTokenRepository.revokeByJti(
-      payload.jti,
-      newJti,
-    )
+    const wasRevoked = await this.refreshTokenRepository.revokeByJti(payload.jti, newJti)
 
     if (!wasRevoked) {
       // Token was already revoked - check grace window
-      if (
-        storedToken.revokedAt &&
-        Date.now() - storedToken.revokedAt.getTime() < GRACE_WINDOW_MS
-      ) {
+      if (storedToken.revokedAt && Date.now() - storedToken.revokedAt.getTime() < GRACE_WINDOW_MS) {
         // Within grace window - find the replacement token and return it
-        this.logger.warn(
-          `Refresh token reuse within grace window: family=${storedToken.familyId}`,
-        )
+        this.logger.warn(`Refresh token reuse within grace window: family=${storedToken.familyId}`)
         // Return the already-issued replacement
         const user = await this.userRepository.findById(storedToken.userId)
         if (!user) throw new UnauthorizedException('User not found')
@@ -215,9 +171,7 @@ export class AuthService {
       }
 
       // Outside grace window - token reuse detected, revoke entire family
-      this.logger.warn(
-        `Refresh token reuse detected: family=${storedToken.familyId}`,
-      )
+      this.logger.warn(`Refresh token reuse detected: family=${storedToken.familyId}`)
       await this.refreshTokenRepository.revokeFamilyById(storedToken.familyId)
       throw new UnauthorizedException('Token reuse detected')
     }

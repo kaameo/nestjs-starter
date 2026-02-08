@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  timestamp,
-  index,
-} from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, timestamp, index } from 'drizzle-orm/pg-core'
 
 import { users } from '../../../user/infrastructure/schema/user.schema'
 
@@ -23,9 +17,7 @@ export const refreshTokens = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     userAgent: varchar('user_agent', { length: 500 }),
     ip: varchar('ip', { length: 45 }),
-    createdAt: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     index('refresh_token_user_idx').on(table.userId),

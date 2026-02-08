@@ -8,9 +8,7 @@ import { sql } from 'drizzle-orm'
 @ApiTags('Health')
 @Controller('health')
 export class HealthController {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: DrizzleDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDatabase) {}
 
   @Public()
   @Get()

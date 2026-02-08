@@ -87,13 +87,11 @@ describe('AuthController (Integration)', () => {
 
   describe('POST /api/v1/auth/sign-in', () => {
     it('should return 401 for unverified email', async () => {
-      await request
-        .post('/api/v1/auth/sign-up')
-        .send({
-          email: 'unverified@example.com',
-          password: 'password123',
-          name: 'Unverified',
-        })
+      await request.post('/api/v1/auth/sign-up').send({
+        email: 'unverified@example.com',
+        password: 'password123',
+        name: 'Unverified',
+      })
 
       const response = await request
         .post('/api/v1/auth/sign-in')

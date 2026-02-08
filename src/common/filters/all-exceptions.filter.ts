@@ -115,9 +115,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     )
   }
 
-  private extractValidationDetails(
-    response: { message: Array<{ property: string; constraints: Record<string, string> }> },
-  ): object {
+  private extractValidationDetails(response: {
+    message: Array<{ property: string; constraints: Record<string, string> }>
+  }): object {
     return response.message.map((detail) => ({
       property: detail.property,
       constraints: detail.constraints,

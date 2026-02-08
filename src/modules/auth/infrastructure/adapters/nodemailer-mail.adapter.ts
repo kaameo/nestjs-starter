@@ -30,11 +30,7 @@ export class NodemailerMailAdapter implements MailPort {
     })
   }
 
-  async sendVerificationEmail(
-    to: string,
-    token: string,
-    name: string,
-  ): Promise<void> {
+  async sendVerificationEmail(to: string, token: string, name: string): Promise<void> {
     const verificationUrl = `${this.mailConfig.VERIFICATION_URL}?token=${token}`
 
     await this.transporter.sendMail({

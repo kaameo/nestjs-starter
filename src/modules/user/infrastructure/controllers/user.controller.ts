@@ -11,13 +11,7 @@ import {
   Query,
 } from '@nestjs/common'
 import { CommandBus, QueryBus } from '@nestjs/cqrs'
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger'
 
 import { CurrentUser } from '@/common/decorators/current-user.decorator'
 import { Roles } from '@/common/decorators/roles.decorator'
@@ -48,13 +42,8 @@ export class UserController {
   @Patch('me')
   @ApiOperation({ summary: 'Update current user profile' })
   @ApiResponse({ status: 200, description: 'Profile updated' })
-  async updateMe(
-    @CurrentUser() user: { sub: string },
-    @Body() dto: UpdateUserDto,
-  ) {
-    return this.commandBus.execute(
-      new UpdateUserCommand(user.sub, { name: dto.name }),
-    )
+  async updateMe(@CurrentUser() user: { sub: string }, @Body() dto: UpdateUserDto) {
+    return this.commandBus.execute(new UpdateUserCommand(user.sub, { name: dto.name }))
   }
 
   @Get('me/posts')

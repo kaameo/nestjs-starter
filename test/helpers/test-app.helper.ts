@@ -43,10 +43,7 @@ export interface TestApp {
   cleanup: () => Promise<void>
 }
 
-export async function createTestApp(
-  modules: any[] = [],
-  providers: any[] = [],
-): Promise<TestApp> {
+export async function createTestApp(modules: any[] = [], providers: any[] = []): Promise<TestApp> {
   const container = await new PostgreSqlContainer('postgres:16-alpine')
     .withDatabase('test_db')
     .withUsername('test')
@@ -89,8 +86,12 @@ export async function createTestApp(
     )
   `)
 
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS refresh_token_user_idx ON refresh_tokens(user_id)`)
-  await db.execute(sql`CREATE INDEX IF NOT EXISTS refresh_token_family_idx ON refresh_tokens(family_id)`)
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS refresh_token_user_idx ON refresh_tokens(user_id)`,
+  )
+  await db.execute(
+    sql`CREATE INDEX IF NOT EXISTS refresh_token_family_idx ON refresh_tokens(family_id)`,
+  )
 
   process.env.NODE_ENV = 'test'
   process.env.JWT_SECRET = 'test-secret-key-at-least-32-chars-long!!'
@@ -115,9 +116,7 @@ export async function createTestApp(
   moduleBuilder.overrideProvider(MAIL_PORT).useValue(mockMailService)
 
   const module = await moduleBuilder.compile()
-  const app = module.createNestApplication<NestFastifyApplication>(
-    new FastifyAdapter(),
-  )
+  const app = module.createNestApplication<NestFastifyApplication>(new FastifyAdapter())
 
   await app.register(fastifyCookie as any)
 

@@ -45,10 +45,7 @@ describe('Auth Flow (E2E)', () => {
 
     // 3. Verify email (get token from DB directly)
     const db = testApp.module.get(DRIZZLE)
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, 'e2e@example.com'))
+    const [user] = await db.select().from(users).where(eq(users.email, 'e2e@example.com'))
 
     const verifyResponse = await request
       .post('/api/v1/auth/verify-email')

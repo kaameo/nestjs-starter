@@ -11,12 +11,8 @@ import {
 } from '../../domain/ports/out/refresh-token-repository.port'
 
 @Injectable()
-export class DrizzleRefreshTokenRepositoryAdapter
-  implements RefreshTokenRepositoryPort
-{
-  constructor(
-    @Inject(DRIZZLE) private readonly db: DrizzleDatabase,
-  ) {}
+export class DrizzleRefreshTokenRepositoryAdapter implements RefreshTokenRepositoryPort {
+  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDatabase) {}
 
   async create(data: CreateRefreshTokenData): Promise<RefreshTokenEntity> {
     const [result] = await this.db
@@ -52,9 +48,7 @@ export class DrizzleRefreshTokenRepositoryAdapter
         revokedAt: new Date(),
         replacedByJti,
       })
-      .where(
-        and(eq(refreshTokens.jti, jti), isNull(refreshTokens.revokedAt)),
-      )
+      .where(and(eq(refreshTokens.jti, jti), isNull(refreshTokens.revokedAt)))
       .returning()
 
     return result.length > 0
@@ -73,24 +67,14 @@ export class DrizzleRefreshTokenRepositoryAdapter
     await this.db
       .update(refreshTokens)
       .set({ revokedAt: new Date() })
-      .where(
-        and(
-          eq(refreshTokens.familyId, familyId),
-          isNull(refreshTokens.revokedAt),
-        ),
-      )
+      .where(and(eq(refreshTokens.familyId, familyId), isNull(refreshTokens.revokedAt)))
   }
 
   async revokeAllByUserId(userId: string): Promise<void> {
     await this.db
       .update(refreshTokens)
       .set({ revokedAt: new Date() })
-      .where(
-        and(
-          eq(refreshTokens.userId, userId),
-          isNull(refreshTokens.revokedAt),
-        ),
-      )
+      .where(and(eq(refreshTokens.userId, userId), isNull(refreshTokens.revokedAt)))
   }
 
   private mapToEntity(row: typeof refreshTokens.$inferSelect): RefreshTokenEntity {

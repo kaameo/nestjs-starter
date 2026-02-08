@@ -46,9 +46,7 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   async signUp(@Body() dto: SignUpDto) {
-    await this.commandBus.execute(
-      new SignUpCommand(dto.email, dto.password, dto.name),
-    )
+    await this.commandBus.execute(new SignUpCommand(dto.email, dto.password, dto.name))
     return { message: 'Registration successful. Please verify your email.' }
   }
 
@@ -66,12 +64,7 @@ export class AuthController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const tokenPair = await this.commandBus.execute<SignInCommand, TokenPair>(
-      new SignInCommand(
-        dto.email,
-        dto.password,
-        req.headers['user-agent'],
-        req.ip,
-      ),
+      new SignInCommand(dto.email, dto.password, req.headers['user-agent'], req.ip),
     )
 
     this.setRefreshTokenCookie(reply, tokenPair.refreshToken)
@@ -136,7 +129,9 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Verification email sent' })
   async resendVerification(@Body() dto: ResendVerificationDto) {
     await this.commandBus.execute(new ResendVerificationCommand(dto.email))
-    return { message: 'If the email exists and is not verified, a verification email has been sent.' }
+    return {
+      message: 'If the email exists and is not verified, a verification email has been sent.',
+    }
   }
 
   @Public()
@@ -152,11 +147,7 @@ export class AuthController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const tokenPair = await this.commandBus.execute<RefreshTokenCommand, TokenPair>(
-      new RefreshTokenCommand(
-        user.refreshToken,
-        req.headers['user-agent'],
-        req.ip,
-      ),
+      new RefreshTokenCommand(user.refreshToken, req.headers['user-agent'], req.ip),
     )
 
     this.setRefreshTokenCookie(reply, tokenPair.refreshToken)

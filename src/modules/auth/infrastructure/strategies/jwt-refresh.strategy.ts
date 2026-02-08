@@ -13,7 +13,10 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: FastifyRequest) => {
-          return (request as FastifyRequest & { cookies: Record<string, string> }).cookies?.refresh_token ?? null
+          return (
+            (request as FastifyRequest & { cookies: Record<string, string> }).cookies
+              ?.refresh_token ?? null
+          )
         },
         ExtractJwt.fromBodyField('refreshToken'),
       ]),
@@ -26,8 +29,7 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
   validate(request: FastifyRequest, payload: { sub: string; jti: string }) {
     const cookies = (request as FastifyRequest & { cookies: Record<string, string> }).cookies
     const refreshToken =
-      cookies?.refresh_token ??
-      (request.body as Record<string, string>)?.refreshToken
+      cookies?.refresh_token ?? (request.body as Record<string, string>)?.refreshToken
 
     return {
       sub: payload.sub,

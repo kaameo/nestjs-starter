@@ -8,9 +8,7 @@ import { DRIZZLE, drizzleProvider, DrizzleDatabase } from './drizzle.provider'
   exports: [DRIZZLE],
 })
 export class DatabaseModule implements OnModuleDestroy {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: DrizzleDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDatabase) {}
 
   async onModuleDestroy() {
     // postgres.js connections are cleaned up automatically

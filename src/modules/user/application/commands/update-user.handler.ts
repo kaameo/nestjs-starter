@@ -9,9 +9,7 @@ import {
 import { UpdateUserCommand } from './update-user.command'
 
 @CommandHandler(UpdateUserCommand)
-export class UpdateUserHandler
-  implements ICommandHandler<UpdateUserCommand, UserModel>
-{
+export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand, UserModel> {
   constructor(
     @Inject(USER_REPOSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,

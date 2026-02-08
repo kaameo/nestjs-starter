@@ -13,11 +13,9 @@ import { globalValidationPipe } from './common/pipes/validation.pipe'
 import { AppConfig } from './common/config/app.config'
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-    { bufferLogs: true },
-  )
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter(), {
+    bufferLogs: true,
+  })
 
   const logger = app.get(Logger)
   app.useLogger(logger)

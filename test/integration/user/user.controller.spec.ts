@@ -54,9 +54,7 @@ describe('UserController (Integration)', () => {
     })
 
     it('should return 401 without token', async () => {
-      await request
-        .get('/api/v1/users/me')
-        .expect(401)
+      await request.get('/api/v1/users/me').expect(401)
     })
   })
 
@@ -75,10 +73,7 @@ describe('UserController (Integration)', () => {
 
   describe('GET /api/v1/users (admin)', () => {
     it('should return 403 for non-admin user', async () => {
-      await request
-        .get('/api/v1/users')
-        .set('Authorization', `Bearer ${accessToken}`)
-        .expect(403)
+      await request.get('/api/v1/users').set('Authorization', `Bearer ${accessToken}`).expect(403)
     })
   })
 })

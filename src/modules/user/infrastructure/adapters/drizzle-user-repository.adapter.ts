@@ -14,38 +14,22 @@ import {
 
 @Injectable()
 export class DrizzleUserRepositoryAdapter implements UserRepositoryPort {
-  constructor(
-    @Inject(DRIZZLE) private readonly db: DrizzleDatabase,
-  ) {}
+  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDatabase) {}
 
   async findById(id: string): Promise<UserModel | null> {
-    const [result] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .limit(1)
+    const [result] = await this.db.select().from(users).where(eq(users.id, id)).limit(1)
 
     return result ? this.mapToModel(result) : null
   }
 
   async findByEmail(email: string): Promise<UserModel | null> {
-    const [result] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1)
+    const [result] = await this.db.select().from(users).where(eq(users.email, email)).limit(1)
 
     return result ? this.mapToModel(result) : null
   }
 
-  async findByEmailWithPassword(
-    email: string,
-  ): Promise<(UserModel & { password: string }) | null> {
-    const [result] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1)
+  async findByEmailWithPassword(email: string): Promise<(UserModel & { password: string }) | null> {
+    const [result] = await this.db.select().from(users).where(eq(users.email, email)).limit(1)
 
     if (!result) return null
 
@@ -97,11 +81,7 @@ export class DrizzleUserRepositoryAdapter implements UserRepositoryPort {
     if (data.emailVerificationExpires !== undefined)
       updateData.emailVerificationExpires = data.emailVerificationExpires
 
-    const [result] = await this.db
-      .update(users)
-      .set(updateData)
-      .where(eq(users.id, id))
-      .returning()
+    const [result] = await this.db.update(users).set(updateData).where(eq(users.id, id)).returning()
 
     return this.mapToModel(result)
   }
@@ -110,18 +90,11 @@ export class DrizzleUserRepositoryAdapter implements UserRepositoryPort {
     await this.db.delete(users).where(eq(users.id, id))
   }
 
-  async findAll(
-    pagination: PaginationParams,
-  ): Promise<{ data: UserModel[]; total: number }> {
+  async findAll(pagination: PaginationParams): Promise<{ data: UserModel[]; total: number }> {
     const offset = (pagination.page - 1) * pagination.limit
 
     const [data, [{ total }]] = await Promise.all([
-      this.db
-        .select()
-        .from(users)
-        .limit(pagination.limit)
-        .offset(offset)
-        .orderBy(users.createdAt),
+      this.db.select().from(users).limit(pagination.limit).offset(offset).orderBy(users.createdAt),
       this.db.select({ total: count() }).from(users),
     ])
 

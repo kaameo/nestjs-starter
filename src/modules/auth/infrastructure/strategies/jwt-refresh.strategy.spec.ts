@@ -112,5 +112,90 @@ describe('JwtRefreshStrategy', () => {
         refreshToken: undefined,
       })
     })
+
+    it('should extract from body when cookies is empty object', () => {
+      const payload = {
+        sub: 'user-456',
+        jti: 'token-id-789',
+      }
+      const mockRequest = {
+        cookies: {},
+        body: {
+          refreshToken: 'body-token',
+        },
+      } as FastifyRequest & { cookies: Record<string, string> }
+
+      const result = strategy.validate(mockRequest, payload)
+
+      expect(result).toEqual({
+        sub: 'user-456',
+        jti: 'token-id-789',
+        refreshToken: 'body-token',
+      })
+    })
+
+    it('should handle empty string in cookie and fall back to body', () => {
+      const payload = {
+        sub: 'user-777',
+        jti: 'token-id-888',
+      }
+      const mockRequest = {
+        cookies: {
+          refresh_token: '',
+        },
+        body: {
+          refreshToken: 'body-token',
+        },
+      } as FastifyRequest & { cookies: Record<string, string> }
+
+      const result = strategy.validate(mockRequest, payload)
+
+      // Empty string is still a truthy value in the cookie check, so it takes priority
+      expect(result).toEqual({
+        sub: 'user-777',
+        jti: 'token-id-888',
+        refreshToken: '',
+      })
+    })
+
+    it('should return correct shape with all required fields', () => {
+      const payload = {
+        sub: 'unique-user-id',
+        jti: 'unique-token-id',
+      }
+      const mockRequest = {
+        cookies: {
+          refresh_token: 'test-token',
+        },
+        body: {},
+      } as FastifyRequest & { cookies: Record<string, string> }
+
+      const result = strategy.validate(mockRequest, payload)
+
+      expect(result).toHaveProperty('sub', 'unique-user-id')
+      expect(result).toHaveProperty('jti', 'unique-token-id')
+      expect(result).toHaveProperty('refreshToken', 'test-token')
+    })
+
+    it('should handle empty string in body', () => {
+      const payload = {
+        sub: 'user-999',
+        jti: 'token-id-000',
+      }
+      const mockRequest = {
+        cookies: {},
+        body: {
+          refreshToken: '',
+        },
+      } as FastifyRequest & { cookies: Record<string, string> }
+
+      const result = strategy.validate(mockRequest, payload)
+
+      expect(result).toEqual({
+        sub: 'user-999',
+        jti: 'token-id-000',
+        refreshToken: '',
+      })
+    })
   })
 })

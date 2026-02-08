@@ -4,7 +4,7 @@ import { of } from 'rxjs'
 import { firstValueFrom } from 'rxjs'
 import { Expose } from 'class-transformer'
 
-import { SerializeInterceptor } from './serialize.interceptor'
+import { SerializeInterceptor, Serialize } from './serialize.interceptor'
 
 class TestDto {
   @Expose()
@@ -13,7 +13,7 @@ class TestDto {
   @Expose()
   name!: string
 
-  password?: string
+  // password field is NOT exposed, so it should be excluded
 }
 
 describe('SerializeInterceptor', () => {
@@ -54,6 +54,8 @@ describe('SerializeInterceptor', () => {
       expect(result).toHaveProperty('id', 1)
       expect(result).toHaveProperty('name', 'John Doe')
       expect(result).not.toHaveProperty('extraField')
+      // Password should be excluded since it's not @Expose()'d
+      expect(Object.keys(result)).toEqual(['id', 'name'])
     })
 
     it('should transform array of objects', async () => {
@@ -86,9 +88,11 @@ describe('SerializeInterceptor', () => {
       expect(result[0]).toHaveProperty('id', 1)
       expect(result[0]).toHaveProperty('name', 'John Doe')
       expect(result[0]).not.toHaveProperty('extraField')
+      expect(Object.keys(result[0])).toEqual(['id', 'name'])
       expect(result[1]).toHaveProperty('id', 2)
       expect(result[1]).toHaveProperty('name', 'Jane Smith')
       expect(result[1]).not.toHaveProperty('extraField')
+      expect(Object.keys(result[1])).toEqual(['id', 'name'])
     })
 
     it('should handle empty array', async () => {
@@ -138,5 +142,81 @@ describe('SerializeInterceptor', () => {
       expect(result).toHaveProperty('name', 'John Doe')
       expect(result).not.toHaveProperty('internalField')
     })
+
+    it('should return instance of DTO class', async () => {
+      const inputData = {
+        id: 1,
+        name: 'John Doe',
+      }
+
+      vi.mocked(mockCallHandler.handle).mockReturnValue(of(inputData))
+
+      const result = await firstValueFrom(
+        interceptor.intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        ),
+      )
+
+      expect(result).toBeInstanceOf(TestDto)
+    })
+
+    it('should handle undefined values in data', async () => {
+      const inputData = {
+        id: 1,
+        name: undefined,
+      }
+
+      vi.mocked(mockCallHandler.handle).mockReturnValue(of(inputData))
+
+      const result = await firstValueFrom(
+        interceptor.intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        ),
+      )
+
+      expect(result).toHaveProperty('id', 1)
+    })
+  })
+})
+
+describe('Serialize', () => {
+  it('should return UseInterceptors decorator', () => {
+    const decorator = Serialize(TestDto)
+
+    expect(typeof decorator).toBe('function')
+  })
+
+  it('should work as method decorator', () => {
+    class TestController {
+      @Serialize(TestDto)
+      getUser() {
+        return {
+          id: 1,
+          name: 'John',
+          password: 'secret',
+        }
+      }
+    }
+
+    const controller = new TestController()
+    expect(controller.getUser).toBeDefined()
+  })
+
+  it('should work as class decorator', () => {
+    @Serialize(TestDto)
+    class TestController {
+      getUser() {
+        return {
+          id: 1,
+          name: 'John',
+          password: 'secret',
+        }
+      }
+    }
+
+    const controller = new TestController()
+    expect(controller.getUser).toBeDefined()
   })
 })

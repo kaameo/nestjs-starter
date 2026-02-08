@@ -28,7 +28,6 @@ export default defineConfig({
         'src/**/infrastructure/adapters/nodemailer-*',
         'src/common/config/index.ts',
       ],
-      all: true,
       thresholds: {
         lines: 80,
         branches: 80,

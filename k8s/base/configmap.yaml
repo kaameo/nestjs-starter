@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nestjs-starter-config
+data:
+  NODE_ENV: production
+  PORT: '3000'
+  HOST: '0.0.0.0'
+  LOG_LEVEL: info
